@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.selina.ptj.mapper.JobMapper">
+    <resultMap id="BaseResultMap" type="org.selina.ptj.bean.Job">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="beginDate" property="beginDate" jdbcType="DATE"/>
+        <result column="endDate" property="endDate" jdbcType="DATE"/>
+        <result column="jobtime" property="jobtime" jdbcType="VARCHAR"/>
+        <result column="workplace" property="workplace" jdbcType="VARCHAR"/>
+        <result column="salary" property="salary" jdbcType="VARCHAR"/>
+        <result column="num" property="num" jdbcType="INTEGER"/>
+        <result column="posttime" property="posttime" jdbcType="DATE"/>
+        <result column="state" property="state" jdbcType="INTEGER"/>
+        <result column="details" property="details" jdbcType="VARCHAR"/>
+        <result column="businessid" property="businessid" jdbcType="INTEGER"/>
+    </resultMap>
+    <resultMap id="AllJobInfo" type="org.selina.ptj.bean.Job" extends="BaseResultMap">
+        <association property="user" javaType="org.selina.ptj.bean.User">
+            <id column="uid" property="id"/>
+            <result column="usname" property="username"/>
+            <result column="teleph" property="telephone"/>
+            <result column="uph" property="phone"/>
+            <result column="uadd" property="address"/>
+            <result column="uname" property="name"/>
+        </association>
+        <association property="business" javaType="org.selina.ptj.bean.Business">
+            <id column="bid" property="id"/>
+            <result column="bname" property="name"/>
+            <result column="btype" property="type"/>
+            <result column="blocal" property="local"/>
+        </association>
+        <association property="jobState" javaType="org.selina.ptj.bean.JobState">
+            <id column="sid" property="id"/>
+            <result column="sZh" property="stateZh"/>
+        </association>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, name, beginDate, endDate, jobtime, workspace,
+        salary, num, posttime, state, businessid, details
+    </sql>
+
+    <select id="getJobByPage" resultMap="AllJobInfo">
+        select j.*,s.`id` as sid,s.`stateZh` as sZh,u.`id` as uid,b.`id` as bid,u.`phone` as uph,
+        u.`address` as uadd,u.`name` as uname,u.`telephone` as teleph,u.`username` as usname,
+        b.`name` as bname,b.`type` as btype,b.`local` as blocal from job j,jobstate s,user u ,business b
+        where j.`state`=s.`id` and j.`businessid`= u.`id` and u.`remark` =b.`id` and j.`state`=1
+        <if test="keyword!=null and keyword!=''">
+            and j.name like concat ('%',#{keyword},'%')
+        </if>
+        <if test=" page != null and size != null">
+            limit #{page},#{size}
+        </if>
+    </select>
+    <select id="getTotal" resultType="java.lang.Long">
+        select count(*) from job where state=1
+        <if test="keyword!=null and keyword!=''">
+            and name like concat ('%',#{keyword},'%')
+        </if>
+    </select>
+    <insert id="insertSelective" parameterType="org.selina.ptj.bean.Job">
+        insert into job(name,beginDate,jobtime,workplace,salary,num,state,details,endDate,businessid)
+        values(#{name,jdbcType=VARCHAR},#{beginDate,jdbcType=DATE},#{jobtime,jdbcType=VARCHAR},#{workplace,jdbcType=VARCHAR},
+        #{salary,jdbcType=VARCHAR},#{num,jdbcType=INTEGER},#{state,jdbcType=INTEGER},#{details,jdbcType=VARCHAR},
+        #{endDate,jdbcType=DATE},#{businessid,jdbcType=INTEGER})
+    </insert>
+    <insert id="addJobs" >
+        insert into job(name,beginDate,jobtime,workplace,salary,num,state,details,endDate,businessid)
+        values
+        <foreach collection="list" separator="," item="job">
+            (#{job.name,jdbcType=VARCHAR},#{job.beginDate,jdbcType=DATE},#{job.jobtime,jdbcType=VARCHAR},#{job.workplace,jdbcType=VARCHAR},
+            #{job.salary,jdbcType=VARCHAR},#{job.num,jdbcType=INTEGER},#{job.state,jdbcType=INTEGER},#{job.details,jdbcType=VARCHAR},
+            #{job.endDate,jdbcType=DATE},#{job.businessid,jdbcType=INTEGER})
+        </foreach>
+    </insert>
+    <insert id="" parameterType="org.selina.ptj.bean.Job" useGeneratedKeys="true" keyProperty="id">
+        insert into job
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="jobtime != null">
+                jobtime,
+            </if>
+            <if test="workplace != null">
+                workplace,
+            </if>
+            <if test="salary != null">
+                salary,
+            </if>
+            <if test="num != null">
+                num,
+            </if>
+            <if test="state != null">
+                state,
+            </if>
+            <if test="beginDate != null">
+                beginDate,
+            </if>
+            <if test="endDate != null">
+                endDate,
+            </if>
+            <if test="details != null">
+                details,
+            </if>
+            <if test="businessid != null">
+                businessid,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="jobtime != null">
+                #{jobtime,jdbcType=VARCHAR},
+            </if>
+            <if test="workplace != null">
+                #{workplace,jdbcType=VARCHAR},
+            </if>
+            <if test="salary != null">
+                #{salary,jdbcType=VARCHAR},
+            </if>
+            <if test="num != null">
+                #{num,jdbcType=INTEGER},
+            </if>1,
+            <if test="beginDate != null">
+                #{beginDate,jdbcType=DATE},
+            </if>
+            <if test="endDate != null">
+                #{endDate,jdbcType=DATE},
+            </if>
+            <if test="details != null">
+                #{details,jdbcType=DATE},
+            </if>,6
+        </trim>
+    </insert>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from job where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <update id="updateByPrimaryKeySelective" parameterType="org.selina.ptj.bean.Job">
+        update job
+        <set>
+            <if test="name!=null">
+                name=#{name,jdbcType=VARCHAR},
+            </if>
+            <if test="num!=null">
+                num=#{num,jdbcType=INTEGER},
+            </if>
+            <if test="beginDate!=null">
+                beginDate=#{beginDate,jdbcType=DATE},
+            </if>
+            <if test="endDate!=null">
+                endDate=#{endDate,jdbcType=DATE},
+            </if>
+            <if test="salary!=null">
+                salary=#{salary,jdbcType=VARCHAR},
+            </if>
+            <if test="workplace!=null">
+                workplace=#{workplace,jdbcType=VARCHAR},
+            </if>
+            <if test="state!=null">
+                state=#{state,jdbcType=INTEGER},
+            </if>
+            <if test="jobtime!=null">
+                jobtime=#{jobtime,jdbcType=VARCHAR},
+            </if>
+            <if test="businessid!=null">
+                businessid=#{businessid,jdbcType=INTEGER},
+            </if>
+            <if test="details!=null">
+                details=#{details,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id=#{id,jdbcType=INTEGER}
+    </update>
+    <update id="passJob" parameterType="org.selina.ptj.bean.Job">
+        update job set state='2' where id=#{id,jdbcType=INTEGER}
+    </update>
+</mapper>
